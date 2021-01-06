@@ -36,11 +36,11 @@ pipeline {
               def suffix = (activeSvc ==~ /mapit-spring-(\d+)/) ? (activeSvc.replaceAll(/mapit-spring-(\d+)/, '$1') as int) + 1 : "1"
               canarySvc = "mapit-spring-${suffix}"
 
-              def dc = openshift.newApp("mapit-spring:${releaseTag}", "--name=${canarySvc}").narrow('dc')
-              openshift.set("probe dc/${canarySvc} --readiness --get-url=http://:8080/ --initial-delay-seconds=30 --failure-threshold=10 --period-seconds=10")
-              openshift.set("probe dc/${canarySvc} --liveness  --get-url=http://:8080/ --initial-delay-seconds=180 --failure-threshold=10 --period-seconds=10")
+              def deployment = openshift.newApp("mapit-spring:${releaseTag}", "--name=${canarySvc}").narrow('dc')
+              openshift.set("probe deployment/${canarySvc} --readiness --get-url=http://:8080/ --initial-delay-seconds=30 --failure-threshold=10 --period-seconds=10")
+              openshift.set("probe deployment/${canarySvc} --liveness  --get-url=http://:8080/ --initial-delay-seconds=180 --failure-threshold=10 --period-seconds=10")
 
-              dc.rollout().status()
+              deployment.rollout().status()
 
               openshift.set("route-backends", "mapit-spring", "${activeSvc}=90%", "${canarySvc}=10%")
             }
