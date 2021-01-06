@@ -71,7 +71,7 @@ pipeline {
           openshift.withCluster() {
             openshift.withProject('prod') {
               openshift.set("route-backends", "mapit-spring", "${canarySvc}=100%")
-              openshift.selector(["dc/${activeSvc}", "svc/${activeSvc}"]).delete()
+              openshift.selector(["deployment/${activeSvc}", "svc/${activeSvc}"]).delete()
             }
           }
         }
