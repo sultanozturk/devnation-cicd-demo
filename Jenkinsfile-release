@@ -12,7 +12,7 @@ pipeline {
             def srcToken = readFile "/run/secrets/kubernetes.io/serviceaccount/token"
 
             withCredentials([usernamePassword(credentialsId: "cicd-quay-credentials", usernameVariable: "QUAY_USER", passwordVariable: "QUAY_PASSWORD")]) {
-              sh "skopeo copy http://${srcMapitRef} https://${destMapitRef} --src-creds openshift:${srcToken} --dest-creds ${env.QUAY_USER}:${env.QUAY_PASSWORD} --src-tls-verify=false --dest-tls-verify=false"
+              sh "skopeo copy ${srcMapitRef} https://${destMapitRef} --src-creds openshift:${srcToken} --dest-creds ${env.QUAY_USER}:${env.QUAY_PASSWORD} --src-tls-verify=false --dest-tls-verify=false"
             }
           }
         }
