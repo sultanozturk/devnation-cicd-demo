@@ -7,7 +7,7 @@ pipeline {
       steps {
         script {
           openshift.withCluster() {
-            def srcMapitRef = openshift.selector("dev", "mapit-spring:latest").object().image.dockerImageReference
+            def srcMapitRef = openshift.selector("mapit-spring:latest").object().image.dockerImageReference
             def destMapitRef = "quay.io/sultanozturk/mapit-spring"
             def srcToken = readFile "/run/secrets/kubernetes.io/serviceaccount/token"
 
