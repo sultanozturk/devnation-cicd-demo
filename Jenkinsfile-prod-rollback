@@ -36,11 +36,11 @@ pipeline {
               def suffix = (activeSvc ==~ /mapit-spring-(\d+)/) ? (activeSvc.replaceAll(/mapit-spring-(\d+)/, '$1') as int) + 1 : "1"
               canarySvc = "mapit-spring-${suffix}"
 
-              def dc = openshift.newApp("mapit-spring:${releaseTag}", "--name=${canarySvc}").narrow('dc')
-              openshift.set("probe dc/${canarySvc} --readiness --get-url=http://:8080/ --initial-delay-seconds=30 --failure-threshold=10 --period-seconds=10")
-              openshift.set("probe dc/${canarySvc} --liveness  --get-url=http://:8080/ --initial-delay-seconds=180 --failure-threshold=10 --period-seconds=10")
+              def deployment = openshift.newApp("mapit-spring:${releaseTag}", "--name=${canarySvc}").narrow('deployment')
+              openshift.set("probe deployment/${canarySvc} --readiness --get-url=http://:8080/ --initial-delay-seconds=30 --failure-threshold=10 --period-seconds=10")
+              openshift.set("probe deployment/${canarySvc} --liveness  --get-url=http://:8080/ --initial-delay-seconds=180 --failure-threshold=10 --period-seconds=10")
 
-              dc.rollout().status()
+              deployment.rollout().status()
 
               openshift.set("route-backends", "mapit-spring", "${activeSvc}=90%", "${canarySvc}=10%")
             }
@@ -71,7 +71,7 @@ pipeline {
           openshift.withCluster() {
             openshift.withProject('prod') {
               openshift.set("route-backends", "mapit-spring", "${canarySvc}=100%")
-              openshift.selector(["dc/${activeSvc}", "svc/${activeSvc}"]).delete()
+              openshift.selector(["deployment/${activeSvc}", "svc/${activeSvc}"]).delete()
             }
           }
         }
@@ -85,7 +85,7 @@ pipeline {
           openshift.withProject('prod') {
             echo "Rolling back to current release ${activeSvc} and deleting the canary"
             openshift.set("route-backends", "mapit-spring", "${activeSvc}=100%")
-            openshift.selector(["dc/${canarySvc}", "svc/${canarySvc}"]).delete()
+            openshift.selector(["deployment/${canarySvc}", "svc/${canarySvc}"]).delete()
           }
         }
       }
@@ -96,7 +96,7 @@ pipeline {
           openshift.withProject('prod') {
             echo "Rolling back to current release ${activeSvc} and deleting the canary"
             openshift.set("route-backends", "mapit-spring", "${activeSvc}=100%")
-            openshift.selector(["dc/${canarySvc}", "svc/${canarySvc}"]).delete()
+            openshift.selector(["deployment/${canarySvc}", "svc/${canarySvc}"]).delete()
           }
         }
       }
